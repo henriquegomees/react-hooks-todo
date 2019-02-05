@@ -1,28 +1,68 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
+import React, { useState, useEffect, Fragment } from 'react'
+
+import ListItem from './ListItem'
+import Form from './Form'
+
+//Initial tasks
+const tasks = [
+  {name: 'task 1', done: false},
+  {name: 'task 2', done: false},
+  {name: 'task 3', done: true},
+]
+
+function TodoApp(){
+  const [todos, setTodos]           = useState(tasks)
+  const [inputValue, setInputValue] = useState()
+
+  //useEffect works basically as componentDidMount and componentDidUpdate
+  useEffect(() => {
+    let count = 0
+    todos.map(todo => !todo.done ? count++ : null)
+    document.title = `${count} task${count > 1 ? 's' : ''} todo`
+  })
+
+  //
+  const _handleSubmit = e => {
+    e.preventDefault()
+    if( inputValue === '' ) return alert('Task name is required')
+
+    const newArr = todos.slice()
+    newArr.splice(0, 0, { name: inputValue, done: false })
+    setTodos(newArr)
+    setInputValue('')
   }
+
+  //
+  const _removeTask = index => {
+    const newArr = todos.slice()
+    newArr.splice(index, 1)
+
+    return setTodos(newArr)
+  }
+
+  const _markAsCompleted = index => {
+    const newArr       = todos.slice()
+    newArr[index].done = !newArr[index].done
+
+    return setTodos(newArr)
+  }
+
+  //
+  return (
+    <Fragment>
+      <Form onSubmit={_handleSubmit} value={inputValue} onChange={e => setInputValue(e.target.value)}/>
+      <ul>
+        {todos.map((todo, index) => 
+          <ListItem 
+            key={index} 
+            todo={todo} 
+            remove={() => _removeTask(index)}
+            completed={() => _markAsCompleted(index)}
+            />)}
+      </ul>
+    </Fragment>
+  )
 }
 
-export default App;
+export default TodoApp
